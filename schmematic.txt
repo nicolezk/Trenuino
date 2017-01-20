@@ -1,0 +1,9 @@
+URL do esquemático:
+http://schematics.com/editor/trenuino-47455/
+
+20/01/2017:
+- adicionado sensor ultrassônico;
+- adicionado motor de passo;
+- adicionao push buttons;
+- adicionado arduíno;
+- adicionado CI ULN2003a;
