@@ -18,7 +18,8 @@ O sensor ultrassônico, acoplado ao eixo do motor, será rotacionado em 360º, d
 - [x] Adicionar a API do sensor ultrassônico
 - [x] Adicionar a API do motor de passos
 - [ ] Salvar medidas em um arquivo .txt
-- [ ] Adicionar um botão para medir (e pausar) e implementar sua interrupção
+- [x] Adicionar botões para start/pause e stop, implementando suas interrupções
+- [ ] Trocar botões por Switches, testando suas vantagens
 - [ ] Testar o sensor ultrassônico em cantos
 - [ ] Melhorar a estrutura física
 - [ ] Identificar a figura geométrica
