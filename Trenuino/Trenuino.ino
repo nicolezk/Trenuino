@@ -15,6 +15,8 @@
  *    https://www.arduino.cc/en/Main/ArduinoEthernetShield
  *    https://www.arduino.cc/en/Tutorial/ReadWrite
  *    https://www.arduino.cc/en/Tutorial/Files
+ *  Funcão qsort()
+ *    https://www.tutorialspoint.com/c_standard_library/c_function_qsort.htm
 */
 
 #include <Stepper.h>
@@ -33,7 +35,8 @@
 /* Cabeçalho */
 void obterMedidas();
 float medirDistancia(int trigPin, int echoPin);
-float media(float distanciasTemporarias[]);
+//float media(float distanciasTemporarias[]);
+float mediana(float distanciasTemporarias[]);
 void escreveArquivo();
 
 /*Variável para criar arquivo*/
@@ -129,12 +132,37 @@ void loop() {
   delay(5000);
 }
 
+/*
 float media(float distanciasTemporarias[]) {
   float sum = 0;
   for(int j = 0; j < nMedidas; j++) {
     sum += distanciasTemporarias[j];
   }
   return (sum/nMedidas);
+}
+*/
+
+int cmpfunc (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+
+float mediana(float distanciasTemporarias[]) {
+  float m;
+  int aux[nMedidas];
+  
+  for(int i = 0; i < nMedidas; i++) {
+    aux[i] = distanciasTemporarias[i] * 100;
+  }
+  
+  qsort(aux, nMedidas, sizeof(aux[0]), cmpfunc);
+  
+  if(nMedidas % 2 == 1)
+    m = aux[(nMedidas/2) + 1];
+  else {
+    m = (aux[(nMedidas/2)] + aux[(nMedidas/2) + 1]) / 2;
+  }
+      
+  return m / 100;
 }
 
 void obterMedidas() {
@@ -150,7 +178,7 @@ void obterMedidas() {
         delay(50);
       }
     
-      medidas[numeroPassos].distancia = media(distanciasTemporarias);
+      medidas[numeroPassos].distancia = mediana(distanciasTemporarias);
       medidas[numeroPassos].grau = (numeroPassos) * 1.8;
 
       // Printa a medicao
