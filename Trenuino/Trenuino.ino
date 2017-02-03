@@ -11,9 +11,15 @@
  *    https://www.arduino.cc/en/Tutorial/StepperOneRevolution
  *  Sensor ultrassônico:
  *    http://howtomechatronics.com/tutorials/arduino/ultrasonic-sensor-hc-sr04/http://howtomechatronics.com/tutorials/arduino/ultrasonic-sensor-hc-sr04/
+ *  Cartão SD:
+ *    https://www.arduino.cc/en/Main/ArduinoEthernetShield
+ *    https://www.arduino.cc/en/Tutorial/ReadWrite
+ *    https://www.arduino.cc/en/Tutorial/Files
 */
 
 #include <Stepper.h>
+#include <SPI.h>
+#include <SD.h>
 
 #define nMedidas 5
 #define stepsPerRevolution 200
@@ -26,13 +32,17 @@
 
 /* Cabeçalho */
 void obterMedidas();
-int medirDistancia(int trigPin, int echoPin);
-int media(int distanciasTemporarias[]);
+float medirDistancia(int trigPin, int echoPin);
+float media(float distanciasTemporarias[]);
+void escreveArquivo();
+
+/*Variável para criar arquivo*/
+File myFile;
 
 /* Registro para medicoes */
 struct Medida{
   float grau;
-  int distancia;
+  float distancia;
 };
 
 /* Declaracao das variaveis globais */
@@ -47,15 +57,17 @@ int volatile numeroPassos = 0;
 
 /* Parametros para API do sensor */
 long duration;
-int distance;
+float distance;
 
 /* Pinos */
-const int trigPin           = 13;
-const int echoPin           = 12;
-const int m1                = 8;
-const int m2                = 9;
-const int m3                = 10;
-const int m4                = 11;
+/* NÃO USAR PINOS 11, 12, 13 e 53 Pois são utilizados pelo shield. O 10 precisa ficar desativado em HIGH */
+
+const int trigPin           = 22;
+const int echoPin           = 24;
+const int m1                = 31;
+const int m2                = 33;
+const int m3                = 35;
+const int m4                = 37;
 const int buttonStartPause  = 3;
 const int buttonStop        = 2;
 
@@ -91,15 +103,34 @@ void setup() {
 
   pinMode(buttonStop, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(buttonStop), FuncaoParar, LOW);
+
+   // Cartão SD
+  pinMode(53, OUTPUT); // Segundo Japa, por algum precisa colocar isso, senão não funciona shield (vimos numa das referencias)
+
+  pinMode(10, OUTPUT); // Como não estamos usando ethernet é necessário desativar esta porta, explicitamente
+  digitalWrite(10, HIGH); // Para isso, deixe em alto para desativar
+
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  Serial.print("Inicializando cartao SD...");
+
+  if (!SD.begin(4)) {
+    Serial.println("Inicializacao falhou!");
+    return;
+  }
+  Serial.println("Inicializacao completa!");
+  
 }
 
 void loop() {
   obterMedidas();
+  escreveArquivo();
   delay(5000);
 }
 
-int media(int distanciasTemporarias[]) {
-  int sum = 0;
+float media(float distanciasTemporarias[]) {
+  float sum = 0;
   for(int j = 0; j < nMedidas; j++) {
     sum += distanciasTemporarias[j];
   }
@@ -107,7 +138,7 @@ int media(int distanciasTemporarias[]) {
 }
 
 void obterMedidas() {
-  int distanciasTemporarias[nMedidas];
+  float distanciasTemporarias[nMedidas];
   
   /* Girar o motor de passo e medir a distância */
   while(numeroPassos < 200) {
@@ -148,7 +179,7 @@ void obterMedidas() {
   numeroPassos = 0;
 }
 
-int medirDistancia(int trigPin, int echoPin){
+float medirDistancia(int trigPin, int echoPin){
     // Reseta o trigPin
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -162,5 +193,22 @@ int medirDistancia(int trigPin, int echoPin){
     distance= duration*0.034/2;
 
     return distance;
+}
+
+void escreveArquivo(){ // Função que escreve no arquivo as medidas + espaço + graus
+    myFile = SD.open("medidas.csv", O_WRITE | O_CREAT | O_TRUNC); // Abre o arquivo medidas.txt
+    if (myFile) { // Se conseguir abrir o arquivo medidas.txt
+      for (int i=0; i< 200; i++){// loop que percorre as 200 posições do vetor e escreve no arquivo medida[i] grau[i]
+         myFile.print(medidas[i].grau);
+         myFile.print(",");
+         myFile.println(medidas[i].distancia);
+      }
+      // close the file:
+      Serial.println("Arquivo salvo com sucesso!");
+      myFile.close();
+    } else {
+        // if the file didn't open, print an error:
+        Serial.println("Erro ao abrir arquivo");
+      }
 }
 
