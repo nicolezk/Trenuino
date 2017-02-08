@@ -1,9 +1,13 @@
-URL do esquem·tico:
+URL do esquem√°tico:
 http://schematics.com/editor/trenuino-47455/
 
 20/01/2017:
-- adicionado sensor ultrassÙnico;
+- adicionado sensor ultrass√¥nico;
 - adicionado motor de passo;
 - adicionao push buttons;
-- adicionado arduÌno;
+- adicionado ardu√≠no;
 - adicionado CI ULN2003a;
+
+01/02/2017:
+- Pinos 4, 10, 11, 12, 13 e 53 reservados para o shield;
+- mudan√ßa dos pinos do sensor ultrass√¥nico e do motor;
