@@ -175,7 +175,7 @@ void obterMedidas() {
     
       for(int j = 0; j < nMedidas; j++) {
         distanciasTemporarias[j] = medirDistancia(trigPin, echoPin);
-        delay(50);
+        delay(100);
       }
     
       medidas[numeroPassos].distancia = mediana(distanciasTemporarias);
@@ -193,9 +193,13 @@ void obterMedidas() {
 
       numeroPassos++;
     }
-    /* Se o botão STOP for pressionado, retorna para posição inicial e seta estado de PARADO */
+    /* Se o botão STOP for pressionado, retorna para posição inicial e seta estado de PARADO e preenche com 0 as posições do vetor */
     else if (estadoExecucao == INTERROMPENDO) {
       myStepper.step((-1) * numeroPassos);
+      for (int i = 0; i < stepsPerRevolution; i++) {
+        medidas[i].grau = 0;
+        medidas[i].distancia = 0;
+      }
       numeroPassos = 0;
       estadoExecucao = 0;
     }
