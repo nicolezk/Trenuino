@@ -99,29 +99,30 @@ void setup() {
 
   myStepper.setSpeed(10);   // Setar a velocidade do motor para 10 rpm 
   
-  Serial.begin(9600);       // Serial para acompanhar as medicoes (sera excluida posteriormente)
+  Serial.begin(9600);       // Monitor Serial para acompanhar as medicoes 
 
-  pinMode(buttonStartPause, INPUT_PULLUP);
+  pinMode(buttonStartPause, INPUT_PULLUP); // Botão Start/Pause
   attachInterrupt(digitalPinToInterrupt(buttonStartPause), StartPause, LOW);
 
-  pinMode(buttonStop, INPUT_PULLUP);
+  pinMode(buttonStop, INPUT_PULLUP); // Botão Stop
   attachInterrupt(digitalPinToInterrupt(buttonStop), FuncaoParar, LOW);
 
-   // Cartão SD
-  pinMode(53, OUTPUT); // Segundo Japa, por algum precisa colocar isso, senão não funciona shield (vimos numa das referencias)
+   // Os Comandos a seguir são relativos a implementação da Shield de Cartão SD
+  pinMode(53, OUTPUT); // Necessário ser setado esse pino para o funcionamento da shield 
 
-  pinMode(10, OUTPUT); // Como não estamos usando ethernet é necessário desativar esta porta, explicitamente
+  pinMode(10, OUTPUT); // Como não estamos usando ethernet é necessário desativar esta porta da Shield, explicitamente 
   digitalWrite(10, HIGH); // Para isso, deixe em alto para desativar
 
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+    ; // Espera a porta serial conectar. Necessario apenas para portas usb nativas
   }
   Serial.print("Inicializando cartao SD...");
-
+  // Caso exista algum erro e o cartão SD não inicialize, escreve uma mensagem de erro no Monitor Serial
   if (!SD.begin(4)) {
     Serial.println("Inicializacao falhou!");
     return;
   }
+  // Caso o cartão SD inicialize com sucesso, escreve uma mensagem de aviso no Monitor Serial.
   Serial.println("Inicializacao completa!");
   
 }
@@ -132,6 +133,7 @@ void loop() {
   delay(5000);
 }
 
+// Foi optado por não utilizar a função a seguir, pois segundo análise feita nos dados, a mediana geraria valores mais precisos.
 /*
 float media(float distanciasTemporarias[]) {
   float sum = 0;
@@ -146,6 +148,7 @@ int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
 
+//Função que calcula a mediana das distâncias obtidas em cada grau medido.
 float mediana(float distanciasTemporarias[]) {
   float m;
   int aux[nMedidas];
@@ -227,19 +230,19 @@ float medirDistancia(int trigPin, int echoPin){
     return distance;
 }
 
-void escreveArquivo(){ // Função que escreve no arquivo as medidas + espaço + graus
-    myFile = SD.open("medidas.csv", O_WRITE | O_CREAT | O_TRUNC); // Abre o arquivo medidas.txt
-    if (myFile) { // Se conseguir abrir o arquivo medidas.txt
-      for (int i=0; i< 200; i++){// loop que percorre as 200 posições do vetor e escreve no arquivo medida[i] grau[i]
+void escreveArquivo(){ // Função que escreve no arquivo as medidas + virgula + graus:
+    myFile = SD.open("medidas.csv", O_WRITE | O_CREAT | O_TRUNC); // Abre o arquivo medidas.csv
+    if (myFile) { // Se conseguir abrir o arquivo medidas.csv:
+      for (int i=0; i< 200; i++){ // loop que percorre as 200 posições do vetor e escreve no arquivo as medidas
          myFile.print(medidas[i].grau);
          myFile.print(",");
          myFile.println(medidas[i].distancia);
       }
-      // close the file:
+      // Fechando o Arquivo:
       Serial.println("Arquivo salvo com sucesso!");
       myFile.close();
     } else {
-        // if the file didn't open, print an error:
+        // Se o arquivo não abrir, printa uma mensagem de erro:
         Serial.println("Erro ao abrir arquivo");
       }
 }
